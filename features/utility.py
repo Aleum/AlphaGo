@@ -17,7 +17,7 @@ def print_features(feature_map):
     for row_index in range(feature_map.rows):
         row = "".join([(value or ".") for value in feature_map.board[row_index]])
         row += "\t"
-        row += "\t".join(["".join(["{0}".format(value or ".") for value in feature[row_index]]) for feature in feature_map.features])
+        row += "\t".join(["".join(["{0}".format(value or ".") for value in feature[row_index]]) for feature in feature_map.input_planes])
         print(row)
 
 def print_board(board):

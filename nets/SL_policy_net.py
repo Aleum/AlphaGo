@@ -128,7 +128,7 @@ if __name__ == "__main__":
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', optimizer=sgd)   
     stop = save_callback()
-    model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], show_accuracy=True, verbose=2)
+    model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], show_accuracy=True, verbose=1)
     
     
     

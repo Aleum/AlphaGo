@@ -208,7 +208,7 @@ class FeatureMap(object):
 
     def _input_planes(self):
         input_planes = []
-        for feature in FeatureMap.FEATURES:
+        for feature in FeatureMapRL.FEATURES:
             if feature['planes'] > 1:
                 input_planes.extend(getattr(self, feature['method_name'])(feature['planes']))
             else:

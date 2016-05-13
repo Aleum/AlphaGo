@@ -11,10 +11,10 @@ from keras import backend as K
 
 k = 32
 bsize = 16
-epoch = 500
+epoch = 350
 lrate = 0.003
 
-SAVE_FOLDER_NAME = "20160506"
+SAVE_FOLDER_NAME = "20160511_rollout"
 
 POSTFIX = ".csv"
 OTHER_TRAIN_FOLDER = "train_other_rollout/"
@@ -68,14 +68,12 @@ def load_dataset():
 class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
-        json_string = model.to_json()
-        open(SAVE_FOLDER_NAME+"/policy_net_model_"+str(epoch)+".json", "w").write(json_string)
-        self.model.save_weights(SAVE_FOLDER_NAME+"/policy_net_weights_"+str(epoch)+".h5")
+        self.model.save_weights(SAVE_FOLDER_NAME+"/rollout_policy_net_weights_"+str(epoch)+".h5")
 
 if __name__ == "__main__":
     
     print "load dataset.."
-    train_x, train_y = load_dataset()
+    #train_x, train_y = load_dataset()
     print "..finish"
     
     print "make model.."
@@ -98,10 +96,12 @@ if __name__ == "__main__":
     
     print "..finish"
     
-    sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
+    json_string = model.to_json()
+    open(SAVE_FOLDER_NAME+"/rollout_policy_net_model.json", "w").write(json_string)
+    '''sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', optimizer=sgd)   
     stop = save_callback()
-    model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], show_accuracy=True, verbose=2)
+    model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], show_accuracy=True, verbose=2)'''
     
     
     

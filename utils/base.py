@@ -10,8 +10,6 @@ import time
 import csv
 import random
 
-from features import *
-
 def get_file_names(path, postfix):
     res = []
 
