@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 import os, math, random
-from features.FeatureMap import *
-from features.Plays import *
+from feature.FeatureMap import *
+from feature.Plays import *
 from base import get_file_names
 from types import NoneType
 

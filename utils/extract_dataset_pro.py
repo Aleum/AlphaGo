@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 import os, math, random
-from features import *
+from feature import *
 from base import *
 
 def load_dataset():

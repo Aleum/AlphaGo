@@ -1,0 +1,24 @@
+This is UCT based Monte Carlo program coded partially in C and 
+uses GNU Go libboard.
+http://londerings.novalis.org/wlog/index.php?title=SimpleGo_v0.4.0
+
+If it fails to load c_board module, it will revert to python code.
+Basically v0.3.7+some changes.
+
+Compilation:
+Copy or symlink GNU Go sources to gnugo directory.
+Then compile it using make.
+
+Example:
+ln -s /usr/local/src/gnugo-3.7.10 gnugo
+make
+
+
+Usage:
+Play game against itself (warns if fails to load c_board module):
+python simple_go.py
+
+
+Play game using GTP (silently reverts to Python code if fails to 
+load c_board module):
+python play_gtp.py

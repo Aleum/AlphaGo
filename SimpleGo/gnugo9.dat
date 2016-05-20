@@ -1,0 +1,17 @@
+# Black: SimpleGo: For more info see http://londerings.novalis.org/wlog/index.php?title=SimpleGo_v0.4.0  Source code is at http://londerings.cvs.sourceforge.net/londerings/go/simple_go/ : 
+# BlackCommand: python play_gtp.py
+# BlackLabel: SimpleGo: For more info see http://londerings.novalis.org/wlog/index.php?title=SimpleGo_v0.4.0  Source code is at http://londerings.cvs.sourceforge.net/londerings/go/simple_go/ : 
+# BlackVersion: 0.4.0
+# Date: April 6, 2016 1:13:25 PM KST
+# Host: Aleum-PC
+# Komi: 6.5
+# Referee: -
+# Size: 9
+# White: Fuego
+# WhiteCommand: fuego.exe
+# WhiteLabel: Fuego
+# WhiteVersion: 1.1
+# Xml: 1
+#
+#GAME	RES_B	RES_W	RES_R	ALT	DUP	LEN	TIME_B	TIME_W	CPU_B	CPU_W	ERR	ERR_MSG
+0	W+6.0	W+5.5	?	0	-	7	8.8	17.6	0	67.3	1	gogui-display: The Go program terminated unexpectedly.

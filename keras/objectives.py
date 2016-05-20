@@ -48,8 +48,6 @@ def cosine_proximity(y_true, y_pred):
     y_pred = K.l2_normalize(y_pred, axis=-1)
     return K.mean(y_true * y_pred, axis=-1)
 
-def go_sl_policy(y_true, y_pred):
-    return K.mean(-K.log(K.prod(K.clip(y_pred, 0.001, np.inf), axis=0)), axis=-1)
 
 # aliases
 mse = MSE = mean_squared_error

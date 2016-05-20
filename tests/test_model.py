@@ -4,10 +4,17 @@ import numpy as np
 from keras.models import model_from_json
 import time, csv, os
 from keras.optimizers import SGD
+from keras import backend as K
 
-OTHER_TRAIN_FOLDER = "test_pro/"
+from RL_policy_net import RL_policy_loss
+
+OTHER_TRAIN_FOLDER = "dataset/test_pro/"
 POSTFIX = ".csv"
 lrate = 0.003
+bsize = 32
+
+MODEL_JSON = "opp_pool/rlpolicy_model_3.json"
+MODEL_H5 = "opp_pool/rlpolicy_model_3.h5"
 
 def get_file_names(path, postfix):
     res = []
@@ -25,6 +32,7 @@ def load_dataset():
     FOLDER.append(OTHER_TRAIN_FOLDER)
     xs, ys = list(), list()
     file_names = get_file_names(OTHER_TRAIN_FOLDER, POSTFIX)
+    
     for name in file_names:
         datas = list()
         cur_rows = list()
@@ -49,9 +57,8 @@ def load_dataset():
                 for a in row:
                     datas.append(a)
             ys.append(datas)
-            break
     '''
-    file_names = get_file_names(OTHER_TRAIN_FOLDER, POSTFIX)
+    
     for name in file_names:
         datas = list()
         cur_rows = list()
@@ -86,10 +93,10 @@ if __name__ == "__main__":
     cor, uncor = 0, 0
     
     X, Y = load_dataset()
-    model = model_from_json(open('rollout_policy_net_moodel.json').read())
-    model.load_weights('rollout_policy_net_weights_168.h5')
+    model = model_from_json(open(MODEL_JSON).read())
+    model.load_weights(MODEL_H5)
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd)   
+    model.compile(loss=RL_policy_loss, optimizer=sgd)   
     before = time.time()
     pResult = model.predict(X)
     after = time.time()

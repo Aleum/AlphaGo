@@ -582,10 +582,10 @@ class MaxPooling1D(_Pooling1D):
     '''Max pooling operation for temporal data.
 
     # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
+        3D tensor with shape: `(samples, steps, feature)`.
 
     # Output shape
-        3D tensor with shape: `(samples, downsampled_steps, features)`.
+        3D tensor with shape: `(samples, downsampled_steps, feature)`.
 
     # Arguments
         pool_length: factor by which to downscale. 2 will halve the input.
@@ -610,10 +610,10 @@ class AveragePooling1D(_Pooling1D):
     '''Average pooling for temporal data.
 
     # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
+        3D tensor with shape: `(samples, steps, feature)`.
 
     # Output shape
-        3D tensor with shape: `(samples, downsampled_steps, features)`.
+        3D tensor with shape: `(samples, downsampled_steps, feature)`.
 
     # Arguments
         pool_length: factor by which to downscale. 2 will halve the input.
@@ -928,10 +928,10 @@ class UpSampling1D(Layer):
     '''Repeat each temporal step `length` times along the time axis.
 
     # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
+        3D tensor with shape: `(samples, steps, feature)`.
 
     # Output shape
-        3D tensor with shape: `(samples, upsampled_steps, features)`.
+        3D tensor with shape: `(samples, upsampled_steps, feature)`.
 
     # Arguments:
         length: integer. Upsampling factor.
@@ -1086,10 +1086,10 @@ class ZeroPadding1D(Layer):
     '''Zero-padding layer for 1D input (e.g. temporal sequence).
 
     # Input shape
-        3D tensor with shape (samples, axis_to_pad, features)
+        3D tensor with shape (samples, axis_to_pad, feature)
 
     # Output shape
-        3D tensor with shape (samples, padded_axis, features)
+        3D tensor with shape (samples, padded_axis, feature)
 
     # Arguments
         padding: int

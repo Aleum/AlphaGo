@@ -641,10 +641,10 @@ class TimeDistributedMerge(Layer):
     '''Sum/multiply/average over the outputs of a TimeDistributed layer.
 
     # Input shape
-        3D tensor with shape: `(samples, steps, features)`.
+        3D tensor with shape: `(samples, steps, feature)`.
 
     # Output shape
-        2D tensor with shape: `(samples, features)`.
+        2D tensor with shape: `(samples, feature)`.
 
     # Arguments
         mode: one of {'sum', 'mul', 'ave'}
@@ -905,10 +905,10 @@ class RepeatVector(Layer):
     '''Repeat the input n times.
 
     # Input shape
-        2D tensor of shape `(nb_samples, features)`.
+        2D tensor of shape `(nb_samples, feature)`.
 
     # Output shape
-        3D tensor of shape `(nb_samples, n, features)`.
+        3D tensor of shape `(nb_samples, n, feature)`.
 
     # Arguments
         n: integer, repetition factor.

@@ -536,7 +536,7 @@ class Sequential(Model, containers.Sequential):
         elif class_mode == 'binary':
             if self.loss.__name__ == 'categorical_crossentropy':
                 warnings.warn('Your model output has shape ' + str(self.output_shape) +
-                              ' (1-dimensional features), but you are using ' +
+                              ' (1-dimensional feature), but you are using ' +
                               ' the `categorical_crossentropy` loss. You ' +
                               'almost certainly want to use `binary_crossentropy` instead.')
             train_accuracy = K.mean(K.equal(self.y, K.round(self.y_train)))
@@ -1279,7 +1279,7 @@ class Graph(Model, containers.Graph):
                     is_categorical_xent = True
                 if is_categorical_xent:
                     warnings.warn('Your model output has shape ' + str(self.output_shape) +
-                                  ' (1-dimensional features), but you are using ' +
+                                  ' (1-dimensional feature), but you are using ' +
                                   ' the `categorical_crossentropy` loss. You ' +
                                   'almost certainly want to use `binary_crossentropy` instead.')
                 train_accuracy = K.mean(K.equal(y, K.round(y_train)))

@@ -287,27 +287,27 @@ if __name__ == "__main__":
         f.write(txt)
         f.close()
     '''
-    print features.label
+    print feature.label
 
-    print("After move {0}{1}".format(features.turn_number,
-                                     " (Game ended.)" if features.turn_number == features.total_plays else " / {0}".format(
-                                         features.total_plays)))
-    print("Next player: {0!r}{1}".format(features.player_color,
-                                         "" if features.turn_number != features.total_plays else "(Game ended.)"))
+    print("After move {0}{1}".format(feature.turn_number,
+                                     " (Game ended.)" if feature.turn_number == feature.total_plays else " / {0}".format(
+                                         feature.total_plays)))
+    print("Next player: {0!r}{1}".format(feature.player_color,
+                                         "" if feature.turn_number != feature.total_plays else "(Game ended.)"))
     print("")
     print("{0}\t{1}")
-    print_features(features)
-    print_int_feature(features.board, features._turns_since_played_plane())
+    print_features(feature)
+    print_int_feature(feature.board, feature._turns_since_played_plane())
     print("")
-    print_int_feature(features.board, features._liberty_planes())
+    print_int_feature(feature.board, feature._liberty_planes())
     print("")
-    print_int_feature(features.board, features._capture_size_plane())
+    print_int_feature(feature.board, feature._capture_size_plane())
     print("")
-    print_int_feature(features.board, features._self_atari_size_plane())
+    print_int_feature(feature.board, feature._self_atari_size_plane())
     print("")
-    print_feature(features._label_plane())
+    print_feature(feature._label_plane())
     print("")
-    print_board(features.board)
+    print_board(feature.board)
     print("")'''
 
     print("Done.")
