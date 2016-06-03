@@ -7,6 +7,7 @@ from keras.optimizers import SGD
 from keras.callbacks import Callback
 from keras import backend as K
 
+from keras.models import model_from_json
 from utils.base import *
 
 lrate = 0.003
@@ -15,7 +16,8 @@ bsize = 64
 epoch = 500
 
 SAVE_FOLDER_NAME = "20160531"
-
+MODEL_FILE_JSON = "RL_value_models/value_net_model.json"
+MODEL_FILE_H5 = "RL_value_models/value_net_weights_6.h5"
 POSTFIX = ".csv"
 OTHER_TRAIN_FOLDER = "RL_value_features_2nd/"
 
@@ -73,28 +75,13 @@ if __name__ == "__main__":
     train_x, train_y = load_dataset()
     print "..finish"
     
-    print "make model.."
-    model = Sequential()
-    
-    model.add(ZeroPadding2D(padding=(1, 1), input_shape=(39, 9, 9)))
-    model.add(Convolution2D(k, 5, 5))
-    model.add(Activation('relu'))
-    
-    for i in range(0, 4):
-        model = hidden_layers(model, k)
-    
-    model.add(ZeroPadding2D(padding=(1, 1)))
-    model.add(Convolution2D(1, 1, 1))
-    model.add(Activation('relu'))
-    
-    model.add(Flatten())
-    model.add(Dense(1))
-    model.add(Activation('tanh'))
+    print "load model.."
+    model = model_from_json(open(MODEL_FILE_JSON).read())
+    model.load_weights(MODEL_FILE_H5)    
+    print "..finish"
     
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='MSE', optimizer=sgd, metrics=["accuracy"])   
-    json_string = model.to_json()
-    open(SAVE_FOLDER_NAME+"/value_net_model.json", "w").write(json_string)
     stop = save_callback()
     model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop])
     

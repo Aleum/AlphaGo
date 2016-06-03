@@ -10,10 +10,8 @@ from keras.models import model_from_json
 from keras.optimizers import SGD
 from keras import backend as K
 
-from RL_policy_net import RL_policy_loss
-
 from utils.base import *
-OPP_POOL_FOLDER = "opp_pool/"
+OPP_POOL_FOLDER = "opp_pool_2nd/"
 
 lrate = 0.003
 
@@ -43,15 +41,6 @@ if __name__ == "__main__":
     SAVE_DATA_FOLER = sys.argv[1]
     SAVE_FEATURE_FOLDER = sys.argv[2]
     
-    prefix_fname = "rlpolicy_feature_"
-    prefix_fname_data = "rlpolicy_data_"
-    
-    numb = int(SAVE_DATA_FOLER[len(prefix_fname):])
-    SAVE_DATA_FOLER = prefix_fname + str((numb + 1))
-    SAVE_FEATURE_FOLDER = prefix_fname_data + str((numb + 1))
-    
-    os.makedirs(SAVE_DATA_FOLER)
-    os.makedirs( SAVE_FEATURE_FOLDER)
     opp_pool = get_file_names(OPP_POOL_FOLDER, ".json")
     
     random_opp_poll = [i for i in range(0, len(opp_pool))]
@@ -72,16 +61,12 @@ if __name__ == "__main__":
         sgd1 = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
         model = model_from_json(open(OPP_POOL_FOLDER+RL_POLICY_JSON).read())
         model.load_weights(OPP_POOL_FOLDER+RL_POLICY_H5)
-        model.compile(loss=RL_policy_loss, optimizer=sgd1)   
+        model.compile(loss='categorical_crossentropy', optimizer=sgd1)   
         
         sgd2 = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
         opp = model_from_json(open(OPP_POOL_FOLDER+OPP_FILE_JSON).read())
         opp.load_weights(OPP_POOL_FOLDER+OPP_FILE_H5)
-        
-        if OPP_FILE_JSON[-6:-8] == "_0":
-            opp.compile(loss='categorical_crossentropy', optimizer=sgd2)
-        else:
-            opp.compile(loss=RL_policy_loss, optimizer=sgd2)
+        opp.compile(loss='categorical_crossentropy', optimizer=sgd2)
             
         cur_model = True
         
@@ -142,7 +127,7 @@ if __name__ == "__main__":
             plays = Plays(playlist)
             features = FeatureMap(plays, len(playlist))
             
-            X = features.input_planes
+            X = features.input_planes_policynet
             
             
             row, col = 0, 0
@@ -187,25 +172,6 @@ if __name__ == "__main__":
             if n >= 50:
                 if game.is_end(True):
                     start = False
-            '''
-            score_BLACK = 0
-            for block in game.current_board.iterate_blocks(BLACK):
-                score_BLACK = score_BLACK + game.current_board.chinese_score_block(block)
-            
-            score_WHITE = 0
-            for block in game.current_board.iterate_blocks(WHITE):
-                score_WHITE = score_WHITE + game.current_board.chinese_score_block(block)
-            
-            if (cur_model and black_player == "model") or (not cur_model and black_player == "opp"):
-                score_BLACK *= -1
-                score_BLACK += game.current_board.score_position_with_liberties()
-                score_WHITE -= game.current_board.score_position_with_liberties()
-            else:
-                score_WHITE *= -1
-                score_BLACK -= game.current_board.score_position_with_liberties()
-                score_WHITE += game.current_board.score_position_with_liberties()
-            '''
-           
             
             legalmove = {}
             legalmove = copy.copy(game.list_moves())
@@ -234,6 +200,5 @@ if __name__ == "__main__":
         f = open(SAVE_DATA_FOLER+"/"+OPP_FILE_JSON+"_"+str(m)+"_"+postfix_fname +".sgf", 'w')
         f.write(str(game))
         f.close()
-    
-    os.system("python extract_dataset_from_sgf.py " + SAVE_DATA_FOLER + " " + SAVE_FEATURE_FOLDER + " " + sys.argv[3])
+
         

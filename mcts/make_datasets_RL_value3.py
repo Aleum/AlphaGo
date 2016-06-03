@@ -18,7 +18,7 @@ SL_POLICY_H5 = "opp_pool/rlpolicy_model_0.h5"
 RL_POLICY_JSON = "opp_pool/rlpolicy_model_195.json"
 RL_POLICY_H5 = "opp_pool/rlpolicy_model_195.h5"
 
-SAVE_DATA_FOLER = "RL_value_dataset/20160525_"
+SAVE_DATA_FOLER = "RL_value_dataset/20160524_"
 
 lrate = 0.003
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     rl_policy.load_weights(RL_POLICY_H5)
     rl_policy.compile(loss='categorical_crossentropy', optimizer=sgd2)   
     
-    for game_num in range(int(sys.argv[1]), 7000000):
+    for game_num in range(31065, 7000000):
         postfix_fname = ""
         print "setting game.."
         game = simple_go.Game(9)     

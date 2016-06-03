@@ -6,15 +6,14 @@ import time, csv, os
 from keras.optimizers import SGD
 from keras import backend as K
 
-from RL_policy_net import RL_policy_loss
 
 OTHER_TRAIN_FOLDER = "dataset/test_pro/"
 POSTFIX = ".csv"
 lrate = 0.003
 bsize = 32
 
-MODEL_JSON = "opp_pool/rlpolicy_model_3.json"
-MODEL_H5 = "opp_pool/rlpolicy_model_3.h5"
+MODEL_JSON = "opp_pool/rollout_policy_net_model.json"
+MODEL_H5 = "opp_pool/rollout_policy_net_weights.h5"
 
 def get_file_names(path, postfix):
     res = []
@@ -96,7 +95,7 @@ if __name__ == "__main__":
     model = model_from_json(open(MODEL_JSON).read())
     model.load_weights(MODEL_H5)
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
-    model.compile(loss=RL_policy_loss, optimizer=sgd)   
+    model.compile(loss="categorical_crossentropy", optimizer=sgd)   
     before = time.time()
     pResult = model.predict(X)
     after = time.time()

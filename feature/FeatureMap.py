@@ -3,7 +3,6 @@
     FeatureMap.py
 """
 from Plays import Plays
-import random, os
 
 """
 Handling of pass (play is None)
@@ -22,6 +21,9 @@ class FeatureMap(object):
         {'name': "self_atari_size", 'method_name': "_self_atari_size_binary_planes", 'planes': 8},
         {'name': "sensibleness", 'method_name': "_sensibleness_plane", 'planes': 1},
         {'name': "zeroes", 'method_name': "_zeroes_plane", 'planes': 1},
+    )
+    VALUE_NET_ADDITIONAL_FEATURES = (
+        {'name': "player_color", 'method_name': "_player_color_plane", 'planes': 1},
     )
     LABEL = {'name': "label", 'method_name': "label_plane", 'planes': 1}
 
@@ -66,7 +68,7 @@ class FeatureMap(object):
     @property
     def cols(self):
         return self._plays.cols
-        
+
     def _player_stones_plane(self):
         mapper = {self._plays.play(self._turn_number).color: 1}
         return [[mapper.get(stone_color, 0) for stone_color in row] for row in self._plays.board(self._turn_number)]
@@ -200,15 +202,21 @@ class FeatureMap(object):
             
         return feature_plane
 
+    def _player_color_plane(self):
+        if self.player_color == 'b':
+            return self._zeroes_plane()
+        else:
+            return self._ones_plane()
+
     def _board_plane(self):
         return self._plays.board(self._turn_number)
 
     def _label_plane(self):
         return self._next_play_plane()
 
-    def _input_planes(self):
+    def _input_planes(self, features):
         input_planes = []
-        for feature in FeatureMap.FEATURES:
+        for feature in features:
             if feature['planes'] > 1:
                 input_planes.extend(getattr(self, feature['method_name'])(feature['planes']))
             else:
@@ -217,8 +225,14 @@ class FeatureMap(object):
         return input_planes
 
     @property
-    def input_planes(self):
-        return self._input_planes()
+    def input_planes_policynet(self):
+        return self._input_planes(FeatureMap.FEATURES)
+
+    @property
+    def input_planes_valuenet(self):
+        features = list(FeatureMap.FEATURES)
+        features.extend(list(FeatureMap.VALUE_NET_ADDITIONAL_FEATURES))
+        return self._input_planes(tuple(features))
 
     @property
     def board(self):
@@ -239,43 +253,39 @@ class FeatureMap(object):
     #     except AttributeError as e:
     #         raise AttributeError("{0!r} object has no attribute {1!r}".format(type(self).__name__, attrname))
 
+
 if __name__ == "__main__":
-    name = "aaaa_x.csv"
-    print name[-5]
-    print name[:len(name)-5]+"y.csv"
-    '''
+
     import os.path
     from utility import print_features, print_int_feature, print_board, print_feature
 
-    SGF_STORAGE_PATH = "../kifu/result_T"
-    # SGF_FILENAME = "0323_result01-104.sgf"
+    SGF_STORAGE_PATH = "."
     SGF_FILENAME = "0323_result01-0.sgf"
     TURN_NUMBER = 69
 
     plays = Plays()
     plays.load_from_sgf(os.path.join(SGF_STORAGE_PATH, SGF_FILENAME))
-    feature = FeatureMap(plays, TURN_NUMBER)
+    features = FeatureMap(plays, TURN_NUMBER)
 
-    print("After move {0}{1}".format(feature.turn_number,
-                                     " (Game ended.)" if feature.turn_number == feature.total_plays else " / {0}".format(
-                                         feature.total_plays)))
-    print("Next player: {0!r}{1}".format(feature.player_color,
-                                         "" if feature.turn_number != feature.total_plays else "(Game ended.)"))
+    print("After move {0}{1}".format(features.turn_number,
+                                     " (Game ended.)" if features.turn_number == features.total_plays else " / {0}".format(
+                                         features.total_plays)))
+    print("Next player: {0!r}{1}".format(features.player_color,
+                                         "" if features.turn_number != features.total_plays else "(Game ended.)"))
     print("")
     print("{0}\t{1}")
-    print_features(feature)
-    print_int_feature(feature.board, feature._turns_since_played_plane())
+    print_features(features)
+    print_int_feature(features.board, features._turns_since_played_plane())
     print("")
-    print_int_feature(feature.board, feature._liberty_planes())
+    print_int_feature(features.board, features._liberties_plane())
     print("")
-    print_int_feature(feature.board, feature._capture_size_plane())
+    print_int_feature(features.board, features._capture_size_plane())
     print("")
-    print_int_feature(feature.board, feature._self_atari_size_plane())
+    print_int_feature(features.board, features._self_atari_size_plane())
     print("")
-    print_feature(feature._label_plane())
+    print_feature(features._label_plane())
     print("")
-    print_board(feature.board)
+    print_board(features.board)
     print("")
 
     print("Done.")
-    '''

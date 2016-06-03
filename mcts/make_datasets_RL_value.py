@@ -5,20 +5,20 @@ from feature.FeatureMap import *
 from SimpleGo.go import *
 from SimpleGo.const import *
 import numpy as np
-import random, copy, time
+import random, copy
 
 from keras.models import model_from_json
 from keras.optimizers import SGD
 from keras import backend as K
 from utils.base import get_file_names
 
-SL_POLICY_JSON = "opp_pool/slpolicy_net_model.json"
-SL_POLICY_H5 = "opp_pool/slpolicy_net_model.h5"
+SL_POLICY_JSON = "opp_pool/rlpolicy_model_0.json"
+SL_POLICY_H5 = "opp_pool/rlpolicy_model_0.h5"
 
-RL_POLICY_JSON = "opp_pool/policy_net_model_299.json"
-RL_POLICY_H5 = "opp_pool/policy_net_model_299.h5"
+RL_POLICY_JSON = "opp_pool_2nd/2nd_rlpolicy_model_21.json"
+RL_POLICY_H5 = "opp_pool_2nd/2nd_rlpolicy_model_21.h5"
 
-SAVE_DATA_FOLER = "RL_value_dataset/20160513_"
+SAVE_DATA_FOLER = "RL_value_dataset_0528/"
 
 lrate = 0.003
 
@@ -44,7 +44,6 @@ def first_state():
 
 if __name__ == "__main__":
 
-    t1 = time.time()
     black_player = ""
     n = 0
     score_BLACK = 0    
@@ -59,153 +58,129 @@ if __name__ == "__main__":
     sgd2 = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     rl_policy = model_from_json(open(RL_POLICY_JSON).read())
     rl_policy.load_weights(RL_POLICY_H5)
-    rl_policy.compile(loss=rl_policy_loss, optimizer=sgd2)   
+    rl_policy.compile(loss='categorical_crossentropy', optimizer=sgd2)   
     
-    if random.random() < 0.5:
-        cur_model = False
-    
-    print "setting game.."
-    game = simple_go.Game(9)     
-    komi = 6.5
-    print "...finish"
-    
-    rand_move_number = int(random.random() * 40)
-    
-    print "random move:", rand_move_number
-    
-    pred_pos = sl_policy.predict(np.asarray([first_state()], dtype=np.float))
-    
-    tmp_pred_pos = np.argmax(pred_pos)
-    col, row = get_state(tmp_pred_pos)
-    
-    while not game.legal_move((col, row)):
-    
-        pred_pos = np.delete(pred_pos, tmp_pred_pos)
+    for game_num in range(int(sys.argv[1]), 7000000):
+        postfix_fname = ""
+        game = simple_go.Game(9)     
+        komi = 6.5
         
-        if len(pred_pos) == 0:
-            start = False
-            break
+        rand_move_number = int(random.random() * 40)
         
-        tmp_pred_pos = np.argmax(pred_pos)
-        col, row = get_state(tmp_pred_pos)
-    
-    game.make_move((col, row))
-    print str(game.current_board)
-    
-    
-    m = 0
-    while m < rand_move_number:
-        #make argument to call model.predict
-        playlist = []
-        n = 1
-        for move in game.move_history:
-            if n%2 == 1:
-                playlist.append(('b', (move[0]-1, move[1]-1)))
-            else:
-                playlist.append(('w', (move[0]-1, move[1]-1)))  
-            n += 1 
+        print "random move:", rand_move_number
         
-        plays = Plays(playlist)
-        features = FeatureMap(plays, len(playlist))
-        
-        X = features.input_planes
-        
-        pred_pos = sl_policy.predict(np.asarray([X], dtype=np.float))
+        pred_pos = sl_policy.predict(np.asarray([first_state()], dtype=np.float))
         
         tmp_pred_pos = np.argmax(pred_pos)
         col, row = get_state(tmp_pred_pos)
         
-        while not game.legal_move((col, row)):
-        
+        if not game.legal_move((col, row)):
             pred_pos = np.delete(pred_pos, tmp_pred_pos)
-            
-            if len(pred_pos) == 0:
-                start = False
-                break
-            
             tmp_pred_pos = np.argmax(pred_pos)
             col, row = get_state(tmp_pred_pos)
         
         game.make_move((col, row))
-        print str(game.current_board)
-        
-        legalmove = {}
-        legalmove = copy.copy(game.list_moves())
-        legalmove.remove((-1, -1))
-        
-        if len(legalmove) == 0:
-            game.current_board.side = BLACK
-            score_BLACK = game.score_position() 
-            game.current_board.side = WHITE
-            score_WHITE = game.score_position()
-            start = False
+           
+        start = True
+        m = 0
+        while m < rand_move_number:
+            #make argument to call model.predict
+            playlist = []
+            n = 1
+            for move in game.move_history:
+                if n%2 == 1:
+                    playlist.append(('b', (move[0]-1, move[1]-1)))
+                else:
+                    playlist.append(('w', (move[0]-1, move[1]-1)))  
+                n += 1 
             
-        if not start:
-            break
-        m += 1
-    
-    col, row = get_state(int(random.random() * 81))
-    #·£´ý Âø¼ö
-    while not game.legal_move((col, row)):
+            plays = Plays(playlist)
+            features = FeatureMap(plays, len(playlist))
+            
+            X = features.input_planes_policynet
+            
+            pred_pos = sl_policy.predict(np.asarray([X], dtype=np.float))
+            
+            tmp_pred_pos = np.argmax(pred_pos)
+            col, row = get_state(tmp_pred_pos)
+            
+            while not game.legal_move((col, row)):
+                pred_pos = np.delete(pred_pos, tmp_pred_pos)
+                if len(pred_pos) == 0:
+                    start = False
+                    break
+                tmp_pred_pos = np.argmax(pred_pos)
+                col, row = get_state(tmp_pred_pos)
+            
+            game.make_move((col, row))
+            
+            if game.is_end(True):
+                start = False
+            if not start:
+                break
+            m += 1
+        
         col, row = get_state(int(random.random() * 81))
-        
-    game.make_move((col, row))
-    print str(game.current_board)
-    
-    while True:
-        #make argument to call model.predict
-        playlist = []
-        n = 1
-        for move in game.move_history:
-            if n%2 == 1:
-                playlist.append(('b', (move[0]-1, move[1]-1)))
-            else:
-                playlist.append(('w', (move[0]-1, move[1]-1)))  
-            n += 1 
-        
-        plays = Plays(playlist)
-        features = FeatureMap(plays, len(playlist))
-        
-        X = features.input_planes
-        
-        
-        pred_pos = rl_policy.predict(np.asarray([X], dtype=np.float))
-        
-        tmp_pred_pos = np.argmax(pred_pos)
-        col, row = get_state(tmp_pred_pos)
-        
+        #·£´ý Âø¼ö
         while not game.legal_move((col, row)):
-        
-            pred_pos = np.delete(pred_pos, tmp_pred_pos)
+            col, row = get_state(int(random.random() * 81))
             
-            if len(pred_pos) == 0:
-                start = False
-                break
+        game.make_move((col, row))
+        
+        if (len(game.move_history) +1) % 2 ==1:
+            black_player = "model"
+        else:
+            black_player = "opp"
+        
+        postfix_fname += str(len(playlist)+2) +"_"
+        start = True
+        while True:
+            #make argument to call model.predict
+            playlist = []
+            n = 1
+            for move in game.move_history:
+                if n%2 == 1:
+                    playlist.append(('b', (move[0]-1, move[1]-1)))
+                else:
+                    playlist.append(('w', (move[0]-1, move[1]-1))) 
+                n += 1 
+            plays = Plays(playlist)
+            features = FeatureMap(plays, len(playlist))
+            
+            X = features.input_planes_policynet
+            
+            
+            pred_pos = rl_policy.predict(np.asarray([X], dtype=np.float))
             
             tmp_pred_pos = np.argmax(pred_pos)
             col, row = get_state(tmp_pred_pos)
-        
-        game.make_move((col, row))
-        print str(game.current_board)
-        
-        legalmove = {}
-        legalmove = copy.copy(game.list_moves())
-        legalmove.remove((-1, -1))
-        
-        if len(legalmove) == 0:
-            game.current_board.side = BLACK
-            score_BLACK = game.score_position() 
-            game.current_board.side = WHITE
-            score_WHITE = game.score_position()
-            start = False
             
-        if not start:
-            break
-    
-    t2 = time.time()
-    print "°É¸° ½Ã°£: " + str(t2 - t1)
-    
-    f = open(SAVE_DATA_FOLER+ "1.sgf", 'w')
-    f.write(str(game))
-    f.close()
+            while not game.legal_move((col, row)):
+                pred_pos = np.delete(pred_pos, tmp_pred_pos)
+                if len(pred_pos) == 0:
+                    start = False
+                    break
+                tmp_pred_pos = np.argmax(pred_pos)
+                col, row = get_state(tmp_pred_pos)
+            
+            game.make_move((col, row))
+            if game.is_end(True):
+                start = False
+            if not start:
+                break
+        
+        if game.getwinner() == 0 and black_player == "model":
+            print "win", game.getwinner(), game.getscore()
+            postfix_fname += "1"
+        elif game.getwinner() == 1 and black_player == "opp":
+            print "win", game.getwinner(), game.getscore()
+            postfix_fname += "1"
+        else:
+            postfix_fname += "0"
+            print "lose", game.getwinner(), game.getscore()
+        
+        
+        f = open(SAVE_DATA_FOLER+str(game_num)+"_"+postfix_fname+".sgf", 'w')
+        f.write(str(game))
+        f.close()
         
