@@ -9,14 +9,16 @@ from keras import backend as K
 from keras.models import model_from_json
 
 from utils.base import *
+
 import numpy as np
+
 
 k = 32
 bsize = 16
 epoch = 500
 lrate = 0.03
 
-SAVE_MODEL_FOLDER = "20160608/h13"
+SAVE_MODEL_FOLDER = "20160608/h02"
 
 POSTFIX = "_x.csv"
 TRAIN_DATA_FOLDER = "20160608/datasets/phase01/"
@@ -69,13 +71,14 @@ def load_dataset():
 class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
-        self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h13_"+str(epoch)+".h5")
+        self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h02_"+str(epoch)+".h5")
         if epoch  == 50:
             self.model.optimizer.lr *= 0.5
         elif epoch == 75:
             self.model.optimizer.lr *= 0.5
             
 if __name__ == "__main__":
+    
     
     if not os.path.exists(SAVE_MODEL_FOLDER):
         os.mkdir(SAVE_MODEL_FOLDER)
@@ -91,7 +94,7 @@ if __name__ == "__main__":
     model.add(Convolution2D(k, 5, 5))
     model.add(Activation('relu'))
     
-    for i in range(0, 13):
+    for i in range(0, 2):
         model = hidden_layers(model, k)
     
     model.add(ZeroPadding2D(padding=(1, 1)))
@@ -106,7 +109,7 @@ if __name__ == "__main__":
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=["accuracy"])
     json_string = model.to_json()
-    open(SAVE_MODEL_FOLDER+"/policy_net_model_h13.json", "w").write(json_string)
+    open(SAVE_MODEL_FOLDER+"/policy_net_model_h02.json", "w").write(json_string)
     stop = save_callback()
     model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], verbose=1)
     

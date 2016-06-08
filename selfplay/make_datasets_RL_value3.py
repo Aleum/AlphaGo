@@ -1,16 +1,19 @@
 # -*- coding: ms949 -*-
 
-from feature.Plays import *
-from feature.FeatureMap import *
-from SimpleGo.go import *
-from SimpleGo.const import *
 import numpy as np
 import random, copy, time
+
+from feature.Plays import *
+from feature.FeatureMap import *
+
+from SimpleGo.go import *
+from SimpleGo.const import *
+
+from utils.base import get_file_names
 
 from keras.models import model_from_json
 from keras.optimizers import SGD
 from keras import backend as K
-from utils.base import get_file_names
 
 SL_POLICY_JSON = "opp_pool/rlpolicy_model_0.json"
 SL_POLICY_H5 = "opp_pool/rlpolicy_model_0.h5"
