@@ -1,0 +1,10 @@
+eclipse.preferences.version=1
+encoding//feature/FeatureMap.py=utf-8
+encoding//feature/Plays.py=utf-8
+encoding//feature/utility.py=utf-8
+encoding//mcts/graph.py=ms949
+encoding//mcts/mcts.py=ms949
+encoding/go.py=ms949
+encoding/mcts_test3.py=ms949
+encoding/mcts_test4.py=ms949
+encoding/play_gtp.py=ms949
