@@ -2,6 +2,7 @@
 """
     Plays.py
 """
+# from __future__ import absolute_import
 from Board import Board
 
 from gomill import sgf
@@ -21,9 +22,12 @@ class Play(object):
     }
         
     def __init__(self, turn_number, color, position):
-        if color not in Play.PLAYER_COLORS:
-            raise ValueError("Invalid player color: {0!r}".format(color))
-            
+        """
+        Args:
+            turn_number: 1-based turn number
+            color: 'b' or 'w'
+            position: A tuple of position (row, col)
+        """
         self._turn_number = turn_number
         self._color = color
         self._row = position[0] if position is not None else None
@@ -133,6 +137,14 @@ class Plays(object):
         Args:
             plays: a list of tuple (color, (row, col))
         """
+        assert plays is not None
+        for play in plays:
+            assert len(play) == 2
+            assert play[0] in ['b', 'w']
+            assert len(play[1]) == 2
+        assert rows > 0
+        assert cols > 0
+
         self.plays = plays
         self._rows = rows
         self._cols = cols
@@ -199,6 +211,7 @@ class Plays(object):
             
         Returns:
             A Play instance of the play corresponding to turn_number.
+            Play(0, 'b', None), if turn_number is 0; before the game starts, suppose as if white has passed in the (virtual) "previous" turn.
                 
         Raises:
             ValueError, if turn_number is not a valid, i.e., total number of plays
@@ -206,9 +219,11 @@ class Plays(object):
                 
         Note: turn_number is 1-based!
         """
-        if (turn_number <= 0) or (turn_number > self.total_plays):
+        if (turn_number < 0) or (turn_number > self.total_plays):
 #            raise ValueError("Invalid turn number: {0}. Valid range is 0 < turn number <= {1}".format(turn_number, self.total_plays))
             return None
+        elif turn_number == 0:
+            return Play(0, 'w', None)
             
         return self._plays[turn_number - 1]
 
@@ -301,7 +316,7 @@ class Plays(object):
                 
     def format_play_sequence(self, turn_number, turns_before=2, turns_after=2, format_str="[{0.turn_number:3}]: {0.color_upper}({0.row}, {0.col})", format_str_pass="[{0.turn_number:3}]: {0.color_upper}(., .)"):
         """
-        Formats a sequene of play.
+        Formats a sequence of play.
         
         Args:
             turn_number: Turn number of the play to format.
@@ -381,97 +396,3 @@ class Plays(object):
 
     def __getitem__(self, item):
         return self._plays[item]
-
-
-if __name__ == "__main__":
-    import os.path
-    import pprint
-    
-    PLAYS = (
-        ( # capture at corner
-            ('b', (0, 0)),
-            ('w', (0, 1)),
-            ('b', (0, 2)),
-            ('w', (1, 0))
-        ),
-
-        ( # ko (repetitive capture) - 패(劫)
-            ('b', (3, 3)),
-            ('w', (3, 4)),
-            ('b', (2, 4)),
-            ('w', (2, 3)),
-            ('b', (3, 5)),
-            ('w', (3, 2)),
-            ('b', (4, 4)), # black captures ('w', (3, 4))
-            ('w', (4, 3)),
-            ('b', (7, 7)),
-            ('w', (3, 4)), # white captures ('b', (3, 3))
-            ('b', (3, 3)), # black captures ('w', (3, 4)) again!
-            ('w', (3, 4)), # white captures ('b', (3, 3)) again!
-        ),
-
-        ( # black stones with two holes
-            ('b', (1, 1)), ('b', (1, 2)), ('b', (1, 3)), ('b', (1, 4)), ('b', (1, 5)),
-            ('b', (2, 1)), ('b', (2, 2)), ('b', (2, 3)), ('b', (2, 4)), ('b', (2, 5)),
-            ('b', (3, 1)),                ('b', (3, 3)), ('b', (3, 4)), ('b', (3, 5)),
-            ('b', (4, 1)), ('b', (4, 2)), ('b', (4, 3)),                ('b', (4, 5)),
-            ('b', (5, 1)), ('b', (5, 2)), ('b', (5, 3)), ('b', (5, 4)), ('b', (5, 5)),
-        ),
-
-        (  # black stones with two holes
-            ('b', (0, 0)), ('b', (0, 1)), ('b', (0, 2)), ('b', (0, 3)), ('b', (0, 4)),
-            ('b', (1, 0)), ('b', (1, 1)), ('b', (1, 2)), ('b', (1, 3)), ('b', (1, 4)),
-            ('b', (2, 0)),                ('b', (2, 2)), ('b', (2, 3)), ('b', (2, 4)),
-            ('b', (3, 0)), ('b', (3, 1)), ('b', (3, 2)),                ('b', (3, 4)),
-            ('b', (4, 0)), ('b', (4, 1)), ('b', (4, 2)), ('b', (4, 3)), ('b', (4, 4)),
-        )
-    )
-
-    SGF_STORAGE_PATH = "../kifu/result_T"
-    SGF_FILENAME = "0323_result01-0.sgf"
-    #    SGF_FILENAME = "0323_result01-104.sgf"
-    TURN_NUMBER = 69
-
-    # plays = Plays()
-    # plays.load_from_sgf(os.path.join(SGF_STORAGE_PATH, SGF_FILENAME))
-    plays = Plays(PLAYS[2])
-    # pprint.pprint(board.board)
-    # pprint.pprint(plays._initial_board)
-    pprint.pprint(plays.board(TURN_NUMBER))
-
-    # print(plays.board(TURN_NUMBER).group_of(1, 2))
-    # print(plays.board(TURN_NUMBER).group_of(1, 8))
-    # print(plays.board(TURN_NUMBER).group_of(2, 1))
-    # group = plays.board(TURN_NUMBER).group_of(2, 4)
-    # print(group)
-    # print(plays.board(TURN_NUMBER).liberty_of(group))
-
-    # group = plays.board(TURN_NUMBER).group_of(2, 4)
-    # print(group)
-    # print(plays.board(TURN_NUMBER).liberty_of(group))
-
-    groups = plays.board(TURN_NUMBER).groups()
-    print(groups)
-    print(len(groups))
-    for group in groups:
-        print(plays.board(TURN_NUMBER).liberty_of(group))
-
-    # print(plays.board(TURN_NUMBER).is_legal(0, 0, 'w')) # False
-    # print(plays.board(TURN_NUMBER).is_legal(1, 1, 'w')) # False
-    # print(plays.board(TURN_NUMBER).is_legal(5, 0, 'w')) # True
-    # print(plays.board(TURN_NUMBER).is_legal(6, 8, 'w'))  # True
-    #
-    # print(plays.board(TURN_NUMBER).is_legal(1, 1, 'b')) # True
-    # print(plays.board(TURN_NUMBER).is_legal(6, 8, 'w'))  # True
-
-    legal_positions = plays.board(TURN_NUMBER).legal_positions('b')
-    print(len(legal_positions))
-    print(legal_positions)
-
-    legal_positions = plays.board(TURN_NUMBER).legal_positions('w')
-    print(len(legal_positions))
-    print(legal_positions)
-
-    print(plays.board(TURN_NUMBER).is_legal(3, 2, 'b'))
-    print(plays.board(TURN_NUMBER).is_sensible(3, 2, 'b'))
-    print(plays.board(TURN_NUMBER).is_sensible(4, 4, 'b'))
