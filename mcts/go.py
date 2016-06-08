@@ -35,7 +35,7 @@ class GoState(object):
         for move in legalmove:
             count_restrict = count_restrict + 1
             if count_restrict < g_mcts_legalmove_restrict:
-                self.actions.appe`nd(GoAction([move[0], move[1]]))
+                self.actions.append(GoAction([move[0], move[1]]))
             else:
                 break            
 

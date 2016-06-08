@@ -2,7 +2,6 @@
 """
     FeatureMap.py
 """
-# from __future__ import absolute_import
 from Plays import Plays
 
 """
@@ -12,19 +11,19 @@ label_plane -> all-zeroes map is returned
 """
 class FeatureMap(object):
     FEATURES = (
-        {'name': "player_stones", 'method_name': "_player_stones_plane", 'planes': 1, 'desc': "player stones"},
-        {'name': "opponent_stones", 'method_name': "_opponent_stones_plane", 'planes': 1, 'desc': "opponent stones"},
-        {'name': "empty_positions", 'method_name': "_empty_positions_plane", 'planes': 1, 'desc': "empty positions"},
-        {'name': "ones", 'method_name': "_ones_plane", 'planes': 1, 'desc': "ones"},
-        {'name': "turns_since_played", 'method_name': "_turns_since_played_binary_planes", 'planes': 8, 'desc': "turns since played"},
-        {'name': "liberties", 'method_name': "_liberties_binary_planes", 'planes': 8, 'desc': "liberties"},
-        {'name': "capture_size", 'method_name': "_capture_size_binary_planes", 'planes': 8, 'desc': "capture_size"},
-        {'name': "self_atari_size", 'method_name': "_self_atari_size_binary_planes", 'planes': 8, 'desc': "self-atari size"},
-        {'name': "sensibleness", 'method_name': "_sensibleness_plane", 'planes': 1, 'desc': "sensibleness"},
-        {'name': "zeroes", 'method_name': "_zeroes_plane", 'planes': 1, 'desc': "zeroes"},
+        {'name': "player_stones", 'method_name': "_player_stones_plane", 'planes': 1},
+        {'name': "opponent_stones", 'method_name': "_opponent_stones_plane", 'planes': 1},
+        {'name': "empty_positions", 'method_name': "_empty_positions_plane", 'planes': 1},
+        {'name': "ones", 'method_name': "_ones_plane", 'planes': 1},
+        {'name': "turns_since_played", 'method_name': "_turns_since_played_binary_planes", 'planes': 8},
+        {'name': "liberties", 'method_name': "_liberties_binary_planes", 'planes': 8},
+        {'name': "capture_size", 'method_name': "_capture_size_binary_planes", 'planes': 8},
+        {'name': "self_atari_size", 'method_name': "_self_atari_size_binary_planes", 'planes': 8},
+        {'name': "sensibleness", 'method_name': "_sensibleness_plane", 'planes': 1},
+        {'name': "zeroes", 'method_name': "_zeroes_plane", 'planes': 1},
     )
     VALUE_NET_ADDITIONAL_FEATURES = (
-        {'name': "player_color", 'method_name': "_player_color_plane", 'planes': 1, 'desc': "player color"},
+        {'name': "player_color", 'method_name': "_player_color_plane", 'planes': 1},
     )
     LABEL = {'name': "label", 'method_name': "label_plane", 'planes': 1}
 
@@ -243,25 +242,50 @@ class FeatureMap(object):
     def label(self):
         return self._label_plane()
 
-    @property
-    def feature_names_policynet(self):
-        names = []
-        for feature in FeatureMap.FEATURES:
-            if feature['planes'] > 1:
-                for index in range(feature['planes']):
-                    names.append("{0} - plane {1}/{2}".format(feature['desc'], index + 1, feature['planes']))
-            else:
-                names.append(feature['desc'])
-        return tuple(names)
+    # def __getattr__(self, attrname):
+    #     from functools import partial
+    #
+    #     for feature in FeatureMap.FEATURES:
+    #         if feature['name'] == attrname:
+    #             return partial(type(self).__dict__[feature['method_name']], self)
+    #     try:
+    #         return super(FeatureMap, self).__getattr__(self, attrname)
+    #     except AttributeError as e:
+    #         raise AttributeError("{0!r} object has no attribute {1!r}".format(type(self).__name__, attrname))
 
-    @property
-    def feature_names_valuenet(self):
-        names = list(self.feature_names_policynet)
-        for feature in FeatureMap.VALUE_NET_ADDITIONAL_FEATURES:
-            if feature['planes'] > 1:
-                for index in range(feature['planes']):
-                    names.append("{0} - plane {1}/{2}".format(feature['desc'], index + 1, feature['planes']))
-            else:
-                names.append(feature['desc'])
 
-        return tuple(names)
+if __name__ == "__main__":
+
+    import os.path
+    from utility import print_features, print_int_feature, print_board, print_feature
+
+    SGF_STORAGE_PATH = "."
+    SGF_FILENAME = "0323_result01-0.sgf"
+    TURN_NUMBER = 69
+
+    plays = Plays()
+    plays.load_from_sgf(os.path.join(SGF_STORAGE_PATH, SGF_FILENAME))
+    features = FeatureMap(plays, TURN_NUMBER)
+
+    print("After move {0}{1}".format(features.turn_number,
+                                     " (Game ended.)" if features.turn_number == features.total_plays else " / {0}".format(
+                                         features.total_plays)))
+    print("Next player: {0!r}{1}".format(features.player_color,
+                                         "" if features.turn_number != features.total_plays else "(Game ended.)"))
+    print("")
+    print("{0}\t{1}")
+    print_features(features)
+    print_int_feature(features.board, features._turns_since_played_plane())
+    print("")
+    print_int_feature(features.board, features._liberties_plane())
+    print("")
+    print_int_feature(features.board, features._capture_size_plane())
+    print("")
+    print_int_feature(features.board, features._self_atari_size_plane())
+    print("")
+    print_feature(features._label_plane())
+    print("")
+    print_board(features.board)
+    print("")
+
+    print("Done.")
