@@ -72,10 +72,7 @@ class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h06_"+str(epoch)+".h5")
-        if epoch  == 50:
-            self.model.optimizer.lr *= 0.5
-        elif epoch == 75:
-            self.model.optimizer.lr *= 0.5
+        self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
             
 if __name__ == "__main__":
     

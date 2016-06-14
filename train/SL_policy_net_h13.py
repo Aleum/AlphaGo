@@ -13,7 +13,7 @@ import numpy as np
 
 k = 32
 bsize = 16
-epoch = 500
+epoch = 100
 lrate = 0.03
 
 SAVE_MODEL_FOLDER = "20160608/h13"
@@ -70,11 +70,12 @@ class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h13_"+str(epoch)+".h5")
-        if epoch  == 50:
-            self.model.optimizer.lr *= 0.5
-        elif epoch == 75:
-            self.model.optimizer.lr *= 0.5
-            
+#         if epoch  == 50:
+#             self.model.optimizer.lr *= 2.0
+#         elif epoch == 75:
+#             self.model.optimizer.lr *= 2.0
+        self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
+         
 if __name__ == "__main__":
     
     if not os.path.exists(SAVE_MODEL_FOLDER):

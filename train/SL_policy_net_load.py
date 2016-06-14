@@ -9,20 +9,16 @@ from keras import backend as K
 from keras.models import model_from_json
 
 from utils.base import *
-
 import numpy as np
-
 
 k = 32
 bsize = 16
-epoch = 500
-lrate = 0.03
-
-SAVE_MODEL_FOLDER = "20160608/h07"
+epoch = 100
+lrate = 0.05
 
 POSTFIX = "_x.csv"
 TRAIN_DATA_FOLDER = "20160608/datasets/phase01/"
-
+SAVE_MODEL_FOLDER = "20160608/h08"
 
 def hidden_layers(m, k):
     m.add(ZeroPadding2D(padding=(1, 1)))
@@ -71,44 +67,34 @@ def load_dataset():
 class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
-        self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h07_"+str(epoch)+".h5")
+        self.model.save_weights(SAVE_MODEL_FOLDER+"/"+SAVE_FILE+str(epoch)+".h5")
         self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
             
 if __name__ == "__main__":
     
-    if not os.path.exists(SAVE_MODEL_FOLDER):
-        os.mkdir(SAVE_MODEL_FOLDER)
-        
+    MODEL_FILE_JSON = "20160608/h08/policy_net_model_h08.json"
+    MODEL_FILE_H5 = "20160608/h08/policy_net_weights_h08_86.h5"
+    SAVE_FILE = "policy_net_weights_h08_2_"
+#     
+#     if not os.path.exists(SAVE_MODEL_FOLDER):
+#         os.mkdir(SAVE_MODEL_FOLDER)
+#         
     print "load dataset.."
     train_x, train_y = load_dataset()
     print "..finish"
     
     print "make model.."
-    model = Sequential()
     
-    model.add(ZeroPadding2D(padding=(1, 1), input_shape=(38, 9, 9)))
-    model.add(Convolution2D(k, 5, 5))
-    model.add(Activation('relu'))
-    
-    for i in range(0, 7):
-        model = hidden_layers(model, k)
-    
-    model.add(ZeroPadding2D(padding=(1, 1)))
-    model.add(Convolution2D(1, 1, 1))
-    model.add(Activation('relu'))
-    
-    model.add(Flatten())
-    model.add(Activation('softmax'))
+    model = model_from_json(open(MODEL_FILE_JSON).read())
+    model.load_weights(MODEL_FILE_H5)   
     
     print "..finish"
     
     sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
     model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=["accuracy"])
-    json_string = model.to_json()
-    open(SAVE_MODEL_FOLDER+"/policy_net_model_h07.json", "w").write(json_string)
     stop = save_callback()
     model.fit(train_x, train_y, batch_size=bsize, nb_epoch=epoch, callbacks=[stop], verbose=1)
-    
-    
+  
+      
     
     

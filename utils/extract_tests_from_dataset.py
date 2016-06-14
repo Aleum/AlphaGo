@@ -3,8 +3,8 @@ import random
 from utils.base import *
 import os
 
-DATA_FOLDER = "20160604_datas/"
-TEST_FOLDER = "other+pro_features_100/"
+DATA_FOLDER = "20160608/datasets/phase01/"
+TEST_FOLDER = "20160608/datasets/test/"
 POSTFIX = "_x.csv"
 
 RATIO = 9527
@@ -36,11 +36,11 @@ if __name__ == "__main__":
         f_y.write(Y)
         f_y.close()
         
-        #os.remove(DATA_FOLDER + fname)
-        #os.remove(DATA_FOLDER + fname[:-len(POSTFIX)] + "_y.csv")
+        os.remove(DATA_FOLDER + fname)
+        os.remove(DATA_FOLDER + fname[:-len(POSTFIX)] + "_y.csv")
         
         num += 1
-        if num % 10 == 0:
+        if num % 100 == 0:
             print "."
     
     print "finish.."
