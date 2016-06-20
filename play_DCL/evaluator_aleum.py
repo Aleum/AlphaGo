@@ -145,7 +145,7 @@ class ThreadEval():
         except Exception as e:
             print "Unexpected error in ThreadEval.eval : ", sys.exc_info()[0]
             print e
-            return 0, 0, 0
+            return 0, 0
 
 class Evaluator():
     def __init__(self, host, port, name, mode):

@@ -165,16 +165,21 @@ def expansionbyselection(node):
         #(col, row)를 key로 넣음.
         tried_action_dict[(actionnode.action.move[0], actionnode.action.move[1])] = actionnode.action.tostr()
     
-#     print 'EBS01'
-    move = node.state.state.network.predict(node.state.state, type = 'SLPOLICY', tried_actions = tried_action_dict)
-#     print 'EBS02', move
-    nextaction = GoAction([move[0], move[1]])
-#     print 'EBS03'
-    print 'expansionbyselection at : ' + str(move[0]) + ',' + str(move[1])
-    t = node.children[nextaction].sample_state()
-#     print 'EBS04'
-    node.children[nextaction].Nr += g_mcts_vl
-    node.children[nextaction].Pa = move[2]
+    try:
+        #     print 'EBS01'
+        move = node.state.state.network.predict(node.state.state, type = 'SLPOLICY', tried_actions = tried_action_dict)
+        #     print 'EBS02'
+        nextaction = GoAction([move[0], move[1]])
+        #     print 'EBS03'
+        #print 'expansionbyselection at : ' + str(move[0]) + ',' + str(move[1])
+        t = node.children[nextaction].sample_state()
+        #     print 'EBS04'
+        node.children[nextaction].Nr += g_mcts_vl
+        node.children[nextaction].Pa = move[2]
+    except Exception as e:
+        print 'error:', e
+        pass
+        return None
 #     print 'EBS05'
     return t
     

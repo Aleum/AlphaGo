@@ -83,7 +83,7 @@ class network():
         row, col = 0, 0
         Pa = 0.1
         
-        #print 'predict00'
+#         print 'predict00'
         
         if self.init == False:            
             legalmove = {}
@@ -103,21 +103,23 @@ class network():
             else:
                 model = self.m_ROLLOUT
             
-            #print 'predict01'
+#             print 'predict01'
             
             tt = game.getargumenttopredict()
             if tt is None:
                 return RESIGN_MOVE
             
-            #print 'predict02'
+            
+#             print 'predict02'
             
 #             t1 = time.time()
             pred_pos = model.predict(np.asarray([tt], dtype=np.float))
-            pred_pos_org = copy.copy(pred_pos[0])
+            pred_pos = pred_pos[0]
+            pred_pos_org = copy.copy(pred_pos)
             #print 'pred_pos.dtype : ' + str(pred_pos.dtype)
 #             t2 = time.time()
             
-            #print 'predict03'
+#             print 'predict03'
             
             tmp_pred_pos = np.argmax(pred_pos)
             #print 'tmp_pred_pos.dtype : ' + str(tmp_pred_pos.dtype)
@@ -126,13 +128,13 @@ class network():
             tmp_row += 1
             tmp_col += 1
             
-            #print 'predict04'
+#             print 'predict04'
             
             row = 10 - tmp_row
             col = tmp_col
             Pa = pred_pos_org[tmp_pred_pos]
             
-            #print 'predict05'
+#             print 'predict05'
             
             #print 'colrow10 : (' + str(col) + ',' + str(row) + ')' + ', Pa : ' + str(Pa)
             
@@ -167,7 +169,7 @@ class network():
             for move in game.move_history:
                 already_actions[(move[0], move[1])] = str(move[0]) + ',' + str(move[1])
                 #already_actions[(move[0], move[1])] = (move[0], move[1])
-                #print 'already_actions : (' + str(move[0]) + ',' + str(move[1]) + ')' + ', Pa : ' + str(Pa)
+#                 print 'already_actions : (' + str(move[0]) + ',' + str(move[1]) + ')' + ', Pa : ' + str(Pa)
             
             #print 'predict101'
                 
@@ -175,11 +177,11 @@ class network():
                 while True:
                     if (col, row) not in already_actions and game.legal_move((col, row)):
                         break
-                    pred_pos = np.delete(pred_pos, tmp_pred_pos)
+                    pred_pos[tmp_pred_pos] = 0.0
                     #print 'predict101-deleted'
                     
                     if len(pred_pos) == 0:
-                        #print 'exit by if len(pred_pos) == 0: 111'
+                        print 'exit by if len(pred_pos) == 0: 111'
                         start = False
                         break
                     
@@ -196,7 +198,7 @@ class network():
                     col = tmp_col
                     Pa = pred_pos_org[tmp_pred_pos]
             
-            #print 'colrow30 : (' + str(col) + ',' + str(row) + ')' + ', Pa : ' + str(Pa)
+#             print 'colrow30 : (' + str(col) + ',' + str(row) + ')' + ', Pa : ' + str(Pa)
             
             '''
             #tried_actions는 dict인데, 여기 있으면 빼고 리턴한다.
@@ -222,8 +224,9 @@ class network():
             print "predict Elapsed : " + str(t2 - t1) + " type : " + type + "   " + str(col) + ", " + str(row) + ', Pa : ' + str(Pa)
             '''
             
-        #print 'colrow50 : (' + str(col) + ',' + str(row) + ')' + ', Pa : ' + str(Pa)
+#         print 'colrow50 : (' + str(col) + ',' + str(row) + ')' + ', Pa : ' + str(Pa)
         #Pa = round(Pa, 4)
+#         print col, row, Pa
         return (col, row, Pa)
     
     def predict_valuenet(self, game):
@@ -237,13 +240,12 @@ class network():
             if tt is None:
                 return -1
             
-            #print 'predict_valuenet01'
+#             print 'predict_valuenet01'
             
             predicted_value = self.m_VALUE.predict(np.asarray([tt], dtype=np.float))
             if predicted_value[0][0] < 0:
                 result = -1
-            
-            #print 'predict_valuenet02'
+                
         except Exception as e:
             print "Unexpected error in predict_valuenet : ", sys.exc_info()[0]
             print e

@@ -57,37 +57,30 @@ def load_dataset():
 
 if __name__ == "__main__":
     
-    MODEL_FOLDER = sys.argv[1]
-    DATA_FOLDER = sys.argv[2]
+    MODEL_JSON = sys.argv[1]
+    MODEL_H5 = sys.argv[2]
+    DATA_FOLDER = sys.argv[3]
     
-    MODEL_JSONs = get_file_names(MODEL_FOLDER, ".json")
+    cor, uncor = 0, 0
     
     X, Y = load_dataset()
-    
-    for MODEL_JSON in MODEL_JSONs:
-        
-        MODEL_H5 = "policy_net_weights_" + MODEL_JSON[len("policy_net_model_"):-len(".json")] + ".h5"
-        print MODEL_JSON, MODEL_H5
-        
-        cor, uncor = 0, 0
-        
-        model = model_from_json(open(MODEL_FOLDER + MODEL_JSON).read())
-        model.load_weights(MODEL_FOLDER + MODEL_H5)
-        sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
-        model.compile(loss="categorical_crossentropy", optimizer=sgd)   
-        before = time.time()
-        pResult = model.predict(X)
-        after = time.time()
-        print "걸린 시간", after-before
-        for i in range(0, len(pResult)):
-            pred = pResult[i].argmax()
-            real = Y[i].argmax()
-            if pred == real:
-                cor += 1
-            else:
-                uncor += 1
-        ACC = 100.0 * cor / len(Y)
-        print "맞은 개수:", cor
-        print "틀린 개수:", uncor
-        print "정확도: %.5f" % ACC
+    model = model_from_json(open(MODEL_JSON).read())
+    model.load_weights(MODEL_H5)
+    sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
+    model.compile(loss="categorical_crossentropy", optimizer=sgd)   
+    before = time.time()
+    pResult = model.predict(X)
+    after = time.time()
+    print "걸린 시간", after-before
+    for i in range(0, len(pResult)):
+        pred = pResult[i].argmax()
+        real = Y[i].argmax()
+        if pred == real:
+            cor += 1
+        else:
+            uncor += 1
+    ACC = 100.0 * cor / len(Y)
+    print "맞은 개수:", cor
+    print "틀린 개수:", uncor
+    print "정확도: %.5f" % ACC
     

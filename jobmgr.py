@@ -24,6 +24,8 @@ from graphvizresult import *
 
 import logging
 
+import sqlite3
+
 #selection, backup 
 class ThreadCalc1(threading.Thread):
     """Threaded Calc1"""
@@ -70,7 +72,6 @@ class ThreadCalc1(threading.Thread):
                 node = self.queue_s.get(True, 1)                
                 
                 self.logger.info('do for selection queue : ' + node.t)
-                self.logger.info('do for selection node : ' + str(node))
                 
                 if node.t == 's' and self.bStop == False:
                     node2 = self.mcts.selection(node)
@@ -83,9 +84,9 @@ class ThreadCalc1(threading.Thread):
                          
                 # 작업 완료를 알리기 위해 큐에 시그널을 보낸다.
                 self.queue_s.task_done()
-            except Exception as e:
+            except Queue.Empty:
                 #Handle empty queue here
-                self.logger.info(str(e))
+                #print 'Queue.Empty'
                 pass
                 
             #backup quque 처리.
@@ -123,14 +124,25 @@ class ThreadCalc3(threading.Thread):
         self.curpath = os.path.dirname( os.path.abspath( __file__ ) )
         
         self.evalcount = 0
+        
+        self.node2 = None
+        
+        try:
+            self.conn = sqlite3.connect(SQLFILENAME, check_same_thread=False)
+            self.c = self.conn.cursor()
+            
+            print 'ThreadCalc3 db connection pass:'
+        except Exception as e:
+            print 'error in ThreadCalc3 db connection :', e
+            pass
 
     def run(self):
         #print "start thread3"
         
         while True:                
             try:
-                node = self.queue_ev.get(True, 1)     
-
+                node = self.queue_ev.get(True, 1)
+                
                 self.evalcount += 1
             
                 #그때그때 다시 접속하게 하기. evaluator에서 accept하고 eval하는 thread가 하나이기 때문.            
@@ -143,13 +155,16 @@ class ThreadCalc3(threading.Thread):
                 #command = 'evalrequest:' + str(len(str(node.state.state)))
                 command = 'evalrequest:'+str(len(str(node.state.state)))
                 s.send(command)
-                self.logger.info( 'send data : ' + repr(command))
+                self.logger.info(self.host + ' : ' + str(self.port) + ' send data : ' + repr(command))
                 
                 #
                 data = s.recv(1024)
                 if data == 'ok':
                     #filename = self.savegame(node.state.state)
                     s.send(str(str(node.state.state)))
+                    
+                    #current board state
+                    #self.logger.info( 'current board state : ' + self.host + ':' + str(self.port) + str(node.state.state.current_board))
                     
                     #응답 기다림.
                     data = s.recv(1024)
@@ -173,6 +188,12 @@ class ThreadCalc3(threading.Thread):
                 self.queue_ev.task_done()
                 
                 s.close()
+                
+                #sqlite에 남김.
+                self.c.execute('insert into minigostate values (?, ?, ?, ?, ?, ?)', (str(node.state.state.current_board), node.result_valuenet, node.result_rollout, self.host, self.port, len(node.state.state.move_history)))
+                self.conn.commit()
+                
+                self.logger.info('pass insert : ')                
             except Queue.Empty:
                 pass
             except Exception as e:
@@ -208,6 +229,19 @@ class jobmgr2():
     def __init__(self, mode):
         
         self.root = None
+        
+        try:
+            conn = sqlite3.connect(SQLFILENAME)
+            c = conn.cursor()
+            
+            c.execute('''CREATE TABLE IF NOT EXISTS minigostate
+             (state varchar(40000), valuenet number, rollout number, ip varchar(1000), port number, turncount number)''')
+                         
+            c.close()
+        except Exception as e:
+            print 'error in jobmgr2.__init__ create db:', e
+            pass
+
         
         self.logger = logging.getLogger('jobmgr')
         self.logger.setLevel(logging.DEBUG)
@@ -327,7 +361,7 @@ class jobmgr2():
                 continue
             self.queue_b.task_done()
             
-        self.logger.info('end of clear : ' + str(self.queue_s.qsize()) + ', ev : ' + str(self.queue_ev.qsize()) + ', b : ' + str(self.queue_b.qsize()))
+        self.logger.info('genmove 005: end of clear : ' + str(self.queue_s.qsize()) + ', ev : ' + str(self.queue_ev.qsize()) + ', b : ' + str(self.queue_b.qsize()))
         
         evalcount = 0
         for worker in self.listofthread2:
@@ -352,4 +386,4 @@ class jobmgr2():
         
         #move = tuple(utils.rand_max(self.root.children.values(), key=lambda x: x.Nv).action.move)
         return move
-          
+        

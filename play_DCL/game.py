@@ -1017,7 +1017,7 @@ class Game(GameSearch,GameExperimental,GameOld):
             score = -score
         else:
             score = score + self.komi
-            
+             
         if score < 0:
             return -score
         return score

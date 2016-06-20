@@ -1,11 +1,11 @@
 # -*- coding: ms949 -*-
-import random, time, sys
+import random, time
 
 from play_gtp import *
 from const import *
-from copy import deepcopy
+import copy
 from go import *
-sys.setrecursionlimit(10000)
+
 def immediate_reward(state_node):
     """
     Estimate the reward with the immediate return of that state.
@@ -80,7 +80,7 @@ def evaluation_RL_FR(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -123,7 +123,7 @@ def evaluation_RL_FR(state_node):
 
     t2 = time.time()
     print "Evaluation Elapsed : " + str(t2 - t1) + " turn : " + str(turn)
-    return turn
+    return t    
 
 def evaluation_SL_FR(state_node):
     '''
@@ -142,9 +142,9 @@ def evaluation_SL_FR(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
-    print "simulgame : \n" + str(simulgame.current_board)    
+    #print "simulgame : \n" + str(simulgame.current_board)    
         
     if state_node.result_valuenet == 0:
         state_node.result_valuenet = simulgame.network.predict_valuenet(simulgame)
@@ -153,13 +153,15 @@ def evaluation_SL_FR(state_node):
     col, row, prob = simulgame.network.predict(simulgame, type = 'SLPOLICY')
     
     simulgame.make_move((col, row))
-    print "simulgame after 1 run by SL " + str(row) + ", " + str(col) + " : \n" + str(simulgame.current_board)
+    #print "simulgame after 1 run by SL " + str(row) + ", " + str(col) + " : \n" + str(simulgame.current_board)
 
     turn = 0
     sumofmovescore = 0
     while simulgame.is_end(by_score=True) == False:
-        col, row, prob = simulgame.network.predict(simulgame, type = 'SLPOLICY')
+        col, row, prob = simulgame.network.predict(simulgame, type = 'ROLLOUT')
         
+        sumofmovescore += simulgame.score_move((col, row))
+                
         #print "predict result by ROLLOUT: " + str(col) + ", " + str(row)        
                 
         #if simulgame.legal_move(tt) == True: 
@@ -175,10 +177,8 @@ def evaluation_SL_FR(state_node):
         
         turn += 1
     
-    print 'exit'
-    
     #여기 나중에 코드 추가. score_BLACK, score_WHITE를 비교해서 자신이 이겼으면 1, 아니면 0
-    if (simulgame.getwinner() ==1 and not IS_BLACK) or (simulgame.getwinner() ==0 and IS_BLACK):
+    if simulgame.getscore() > 0:
         state_node.result_rollout = 1
     else:
         state_node.result_rollout = -1
@@ -204,7 +204,7 @@ def evaluation_FR_FR(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -266,7 +266,7 @@ def evaluation_SL_SL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
 #     print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -325,7 +325,7 @@ def evaluation_RL_RL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy.copy(state_node.state.state)
     
 #     print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -386,7 +386,7 @@ def evaluation_FR_RL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -448,7 +448,7 @@ def evaluation_FR_SL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -510,7 +510,7 @@ def evaluation_SL_RL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         
@@ -572,7 +572,7 @@ def evaluation_RL_SL(state_node):
     . reward로 쭉쭉 계산한다. 게임 끝까지.
     '''
     simulgame = simple_go.Game(9)
-    simulgame = deepcopy(state_node.state.state)
+    simulgame = copy(state_node.state.state)
     
     #print "simulgame : \n" + str(simulgame.current_board)    
         

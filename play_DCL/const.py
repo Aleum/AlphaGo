@@ -76,6 +76,8 @@ VALUE_H5 = "network/value_net_weights_5.h5"
 RLPOLICY_JSON = "network/2nd_rlpolicy_model_21.json"
 RLPOLICY_H5 = "network/2nd_rlpolicy_model_21.h5"
 
+IS_BLACK = False
+
 
 #EVALUATOR_PORTS = 50001,50002,50003
 EVALUATOR_PORTS = 50001
