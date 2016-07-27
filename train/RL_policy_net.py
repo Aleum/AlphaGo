@@ -56,13 +56,13 @@ def RL_policy_loss(y_true, y_pred):
 
 if __name__ == "__main__":
     
-    SAVE_FOLDER_NAME = "opp_pool_2nd/"
+    SAVE_FOLDER_NAME = "opp_pool/"
     
     SAVE_DATA_FOLER = sys.argv[1]
     TRAIN_FOLDER = sys.argv[2]
     RLMODEL = sys.argv[3]
 
-    prefix_fname = "2nd_rlpolicy_model_"
+    prefix_fname = "rlpolicy_model_"
     MODEL_FILE_JSON = RLMODEL+".json"
     MODEL_FILE_H5 = RLMODEL+".h5"
     RLMODEL = prefix_fname + str((int(RLMODEL[len(prefix_fname):])+1))

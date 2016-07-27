@@ -3,7 +3,7 @@
 from keras.models import Sequential
 from keras.layers.core import Activation, Dense, Flatten
 from keras.layers.convolutional import Convolution2D, ZeroPadding2D, MaxPooling2D
-from keras.optimizers import SGD
+from keras.optimizers import Adadelta
 from keras.callbacks import Callback
 from keras import backend as K
 from keras.models import model_from_json
@@ -11,17 +11,17 @@ from keras.models import model_from_json
 from utils.base import *
 
 import numpy as np
-
+from keras.datasets import mnist
 
 k = 32
 bsize = 16
 epoch = 500
-lrate = 0.03
+lrate = 0.003
 
-SAVE_MODEL_FOLDER = "20160608/h01"
+SAVE_MODEL_FOLDER = "20160715/h01"
 
 POSTFIX = "_x.csv"
-TRAIN_DATA_FOLDER = "20160608/datasets/phase01/"
+TRAIN_DATA_FOLDER = "20160715/same_dataset/"
 
 
 def hidden_layers(m, k):
@@ -72,8 +72,9 @@ class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h01_"+str(epoch)+".h5")
-        self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
+#         self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
 
+            
 if __name__ == "__main__":
     
     if not os.path.exists(SAVE_MODEL_FOLDER):
@@ -81,6 +82,19 @@ if __name__ == "__main__":
         
     print "load dataset.."
     train_x, train_y = load_dataset()
+#         (X_train, y_train), (X_test, y_test) = mnist.load_data()
+# X_train = X_train.reshape(X_train.shape[0], 1, 28, 28)
+# X_test = X_test.reshape(X_test.shape[0], 1, 28, 28)
+# X_train = X_train.astype('float32')
+# X_test = X_test.astype('float32')
+# X_train /= 255
+# X_test /= 255
+# Y_train = np_utils.to_categorical(y_train, 10);
+# Y_test = np_utils.to_categorical(y_test, 10);
+# print(X_train.shape);
+# print(Y_train.shape);
+# print(X_test.shape);
+# print(Y_test.shape);
     print "..finish"
     
     print "make model.."
@@ -102,8 +116,8 @@ if __name__ == "__main__":
     
     print "..finish"
     
-    sgd = SGD(lr=lrate, decay=0.0, momentum=0.0, nesterov=False)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=["accuracy"])
+    sgd = Adadelta(lr=lrate, rho=0.95, epsilon=1e-08)
+    model.compile(loss='categorical_crossentropy', optimizer="Adadelta", metrics=["accuracy"])
     json_string = model.to_json()
     open(SAVE_MODEL_FOLDER+"/policy_net_model_h01.json", "w").write(json_string)
     stop = save_callback()

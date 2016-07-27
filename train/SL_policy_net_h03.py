@@ -11,25 +11,18 @@ from keras.models import model_from_json
 from utils.base import *
 
 import numpy as np
-
+from keras.datasets import mnist
 
 k = 32
 bsize = 16
 epoch = 500
-lrate = 0.03
+lrate = 0.003
 
-SAVE_MODEL_FOLDER = "20160608/h03"
+SAVE_MODEL_FOLDER = "20160715/h03"
 
 POSTFIX = "_x.csv"
-TRAIN_DATA_FOLDER = "20160608/datasets/phase01/"
+TRAIN_DATA_FOLDER = "20160715/dataset/"
 
-
-def hidden_layers(m, k):
-    m.add(ZeroPadding2D(padding=(1, 1)))
-    m.add(Convolution2D(k, 3, 3))
-    m.add(Activation('relu'))
-    
-    return m
 
 def load_dataset():
     xs, ys = list(), list()
@@ -59,9 +52,9 @@ def load_dataset():
                 datas.append(float(a))
         ys.append(datas)
         n_idx += 1
-        if n_idx % 100 == 0:
+        if n_idx % 10000 == 0:
             print n_idx
-    
+            
     xs = np.asarray(xs, dtype=np.float)
     ys = np.asarray(ys, dtype=np.float)
     print "xs", xs.shape, "ys", ys.shape
@@ -72,7 +65,7 @@ class save_callback(Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         self.model.save_weights(SAVE_MODEL_FOLDER+"/policy_net_weights_h03_"+str(epoch)+".h5")
-        self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
+#         self.model.optimizer.lr = float(open(SAVE_MODEL_FOLDER+"/lr.txt").read())
 
             
 if __name__ == "__main__":
@@ -88,17 +81,16 @@ if __name__ == "__main__":
     model = Sequential()
     
     model.add(ZeroPadding2D(padding=(1, 1), input_shape=(38, 9, 9)))
-    model.add(Convolution2D(k, 5, 5))
+    model.add(Convolution2D(k, 3, 3))
     model.add(Activation('relu'))
     
     for i in range(0, 3):
-        model = hidden_layers(model, k)
-    
-    model.add(ZeroPadding2D(padding=(1, 1)))
-    model.add(Convolution2D(1, 1, 1))
-    model.add(Activation('relu'))
+        model.add(ZeroPadding2D(padding=(1, 1)))
+        model.add(Convolution2D(k, 1, 1))
+        model.add(Activation('relu'))
     
     model.add(Flatten())
+    model.add(Dense(81))
     model.add(Activation('softmax'))
     
     print "..finish"

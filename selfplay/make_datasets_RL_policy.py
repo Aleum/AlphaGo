@@ -11,8 +11,8 @@ from keras.optimizers import SGD
 from keras import backend as K
 
 from utils.base import *
-OPP_POOL_FOLDER = "opp_pool_2nd/"
-
+OPP_POOL_FOLDER = "opp_pool/"
+SAVE_DATA_FOLER = "opp_pool/"
 lrate = 0.003
 
 def get_state(max_pos):
@@ -36,16 +36,16 @@ def first_state():
     return np.asarray(state, dtype=np.float)
 
 if __name__ == "__main__":
-    RL_POLICY_JSON = sys.argv[3]+".json"
-    RL_POLICY_H5 = sys.argv[3]+".h5"
-    SAVE_DATA_FOLER = sys.argv[1]
-    SAVE_FEATURE_FOLDER = sys.argv[2]
+    RL_POLICY_JSON = sys.argv[1]+".json"
+    RL_POLICY_H5 = sys.argv[1]+".h5"
+#     SAVE_DATA_FOLER = sys.argv[1]
+#     SAVE_FEATURE_FOLDER = sys.argv[2]
     
     opp_pool = get_file_names(OPP_POOL_FOLDER, ".json")
     
     random_opp_poll = [i for i in range(0, len(opp_pool))]
     
-    for m in range(0, 32):
+    for m in range(0, 1):
         
         ropp = int(random.random() * len(random_opp_poll))
         
@@ -81,10 +81,10 @@ if __name__ == "__main__":
         
         #Ã¹¹øÂ° Âø¼ö
         if cur_model:
-            pred_pos = model.predict(np.asarray([first_state()], dtype=np.float))
+            pred_pos = model.predict(np.asarray([first_state()], dtype=np.float))[0]
             black_player = "model"
         else:
-            pred_pos = opp.predict(np.asarray([first_state()], dtype=np.float))
+            pred_pos = opp.predict(np.asarray([first_state()], dtype=np.float))[0]
             black_player = "opp"
             
         pred_pos = np.argmax(pred_pos)
@@ -132,9 +132,9 @@ if __name__ == "__main__":
             
             row, col = 0, 0
             if cur_model:
-                pred_pos = model.predict(np.asarray([X], dtype=np.float))
+                pred_pos = model.predict(np.asarray([X], dtype=np.float))[0]
             else:
-                pred_pos = opp.predict(np.asarray([X], dtype=np.float))
+                pred_pos = opp.predict(np.asarray([X], dtype=np.float))[0]
                 
             tmp_pred_pos = np.argmax(pred_pos)
             
@@ -149,11 +149,7 @@ if __name__ == "__main__":
             while True:
                 if game.legal_move((col, row)):
                     break
-                pred_pos = np.delete(pred_pos, tmp_pred_pos)
-                
-                if len(pred_pos) == 0:
-                    start = False
-                    break
+                pred_pos[tmp_pred_pos] = 0
                 
                 tmp_pred_pos = np.argmax(pred_pos)
                 tmp_row = int(tmp_pred_pos / 9)
@@ -164,8 +160,9 @@ if __name__ == "__main__":
                 row = 10 - tmp_row
                 col = tmp_col
                 
-            if not start:
-                break
+                if pred_pos[tmp_pred_pos] == 0:
+                    break
+                
             game.make_move((col, row))
             print str(game.current_board)
             print game.getscore()
